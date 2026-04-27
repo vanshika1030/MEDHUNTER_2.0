@@ -1,0 +1,4 @@
+node_modules/
+bar_sc/node_modules/
+bar_sc/frontend/node_modules/
+.env
