@@ -9,8 +9,11 @@ const Inventory = require("./models/inventory");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+//app.use(cors()); connects frontend to backend from diff origins
+app.use(cors({
+  origin: "http://localhost:3000"
+}));
+app.use(express.json());//parses the daya sent by req.body into redable format
 
 
 app.post("/add-medicine", async (req, res) => {
@@ -19,7 +22,7 @@ app.post("/add-medicine", async (req, res) => {
 
     console.log("BODY:", req.body);
 
-    // Validation
+   
     if (!name || !name.trim()) {
       return res.status(400).json({ error: "Medicine name is required" });
     }
@@ -32,14 +35,14 @@ app.post("/add-medicine", async (req, res) => {
       return res.status(400).json({ error: "Quantity must be greater than 0" });
     }
 
-    // Check if medicine exists by barcode
+   
     let medicine;
     
     if (barcode && barcode.trim()) {
       medicine = await Medicine.findOne({ barcode: barcode.trim() });
     }
 
-    // If medicine doesn't exist, create it
+    
     if (!medicine) {
       medicine = new Medicine({
         name: name.trim(),
@@ -60,7 +63,7 @@ app.post("/add-medicine", async (req, res) => {
       console.log("Updated existing medicine:", medicine);
     }
 
-    // Add to inventory
+    // Add to medicine to inventory 
     const inventory = new Inventory({
       shopId,
       medicineId: medicine._id,
@@ -85,7 +88,7 @@ app.post("/scan-barcode", async (req, res) => {
   try {
     let medicine = await Medicine.findOne({ barcode });
 
-    // ❌ NOT FOUND
+  
     if (!medicine) {
       return res.json({
         found: false,
@@ -138,7 +141,7 @@ app.get("/inventory/:shopId", async (req, res) => {
 });
 
 
-/* -----to delete medicine--- */
+
 app.delete("/delete-inventory/:id", async (req, res) => {
   try {
     await Inventory.findByIdAndDelete(req.params.id);
@@ -149,7 +152,6 @@ app.delete("/delete-inventory/:id", async (req, res) => {
 });
 
 
-/* ------ connecting to database ---- */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected");
