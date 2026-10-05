@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Scanner from "./Scanner";
 import Inventory from "./Inventory";
-
+import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 function App() {
   return (
     <BrowserRouter>
@@ -32,26 +33,36 @@ function App() {
 }
 
 function ScannerWrapper() {
+  const navigate = useNavigate();
+  const scanningRef = useRef(false); 
+
   const handleScan = async (barcode) => {
-  const res = await fetch("http://localhost:5000/scan-barcode", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ barcode })
-  });
+    if (scanningRef.current) return;
+    scanningRef.current = true;
 
-  const data = await res.json();
+    try {
+      const res = await fetch("http://localhost:5000/scan-barcode", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ barcode })
+      });
 
-  if (!data.found) {
-    // ❗ redirect to inventory page with barcode
-    window.location.href = `/inventory?barcode=${barcode}`;
-  } else {
-    alert("Medicine added to inventory");
-  }
-};
+      const data = await res.json();
 
-  return <Scanner onScan={handleScan} />;
+      if (!data.found) {
+        navigate(`/inventory?barcode=${barcode}`);
+      } else {
+        alert("Medicine added to inventory");
+      }
+
+    } catch (err) {
+      console.error(err);
+      scanningRef.current = false; 
+    }
+  };
+
+  return <Scanner onScan={handleScan} />;//used by scanner.js as a fun passed as a prop
 }
-
 export default App;

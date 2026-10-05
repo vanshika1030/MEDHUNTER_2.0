@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom"; 
+import { useLocation } from "react-router-dom"; //reads krta hai url ko
 function Inventory() {
     const shopId= "SHOP001";
     const location = useLocation(); 
-  const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search);//reads barcode from query
   const scannedBarcode = params.get("barcode");
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
